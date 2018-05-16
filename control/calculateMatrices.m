@@ -1,0 +1,12 @@
+dt=0.02;
+[ A_d,B_d,D_d ] = contToDiscr( A,B,D,dt );
+% [ ~,BAllD,~]=contToDiscr( A,BAllFloors,Ba,dt);
+C=eye(40);
+% C=C([1,10,20],:);
+sys_cont=ss(A,[B,D],C,zeros([size(C,1),size([B,D],2)]));
+sys_discr=ss(A_d,[B_d,D_d],C,zeros([size(C,1),size([B,D],2)]),dt);
+Q=zeros(40);
+Q(1:20,1:20)=diag(SimpleStiffnessCoeff);
+Q(21:40,21:40)=diag(xWithK3(1:20));
+Q=1/2*Q;
+R=0.002*eye(20);

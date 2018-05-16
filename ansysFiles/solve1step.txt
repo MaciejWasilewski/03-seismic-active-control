@@ -1,0 +1,2 @@
+SOLVE
+/INPUT,forSync,txt

@@ -1,0 +1,4 @@
+Finish
+/solution
+antype,,restart,1,1
+/INPUT,forSync,txt

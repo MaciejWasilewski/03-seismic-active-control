@@ -1,0 +1,13 @@
+*del,elNodes
+*dim,elNodes,array,1312,2   
+*do,iter,1,1312,1
+*get,el1,elem,iter,node,1   
+*SET,elNodes(iter,1),el1
+*get,el1,elem,iter,node,2    
+*SET,elNodes(iter,2),el1
+*enddo
+*cfopen,elNodes.txt
+*VWRITE,elNodes(1,1),elNodes(1,2)
+(F50.25,F50.25)
+*cfclose
+/INPUT,forSync,txt
