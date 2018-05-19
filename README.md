@@ -7,7 +7,6 @@ This repository consists of Matlab scripts that produced results for my third re
 The goal of the research is to test our control algorithm in the simulation of the building excited by an earthquake. The finite element model of the building is simulated in Ansys. The algorithm is compared to the LQG regulator.
 Apart from the algorithm logic itself, the interface between Matlab and Ansys is also established.
 
-The files neccessary for the ultimate simulation and comparison are placed in **control** folder.
 While I believe that the whole simulation program, as a part of scientific research, is intended to be run limited number of times, I decided to develop its logic according to the object-oriented paradigm.
 The reasoning for such a decision is twofold - whole simulation setting is very easy to split into objects - it consists of the building, sensors, actuators, controllers and the distrubance (in our case an earthquake) and it makes it easier to try out different approaches, that is, different algorithms or actuators.
 
