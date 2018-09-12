@@ -1,4 +1,0 @@
-Finish
-/solution
-antype,4
-/INPUT,forSync,txt

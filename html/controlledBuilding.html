@@ -1,0 +1,271 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>controlledBuilding</title><meta name="generator" content="MATLAB 9.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-10-04"><meta name="DC.source" content="controlledBuilding.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="keyword">classdef</span> controlledBuilding&lt;handle
+    <span class="comment">%UNTITLED Summary of this class goes here</span>
+    <span class="comment">%   Detailed explanation goes here</span>
+
+    <span class="keyword">properties</span>
+        state double
+        time double
+        anCon ansysConnector
+        nodePositions
+        elemNodes
+        elemPos
+    <span class="keyword">end</span>
+
+    <span class="keyword">methods</span>
+        <span class="keyword">function</span> obj=controlledBuilding()
+            delete(<span class="string">'D:\Program Files\Ansys\ANSYS Inc\v180\ansys\bin\winx64\file.lock'</span>);
+            [~,~]=system(<span class="string">'c:\Users\wasyl\Desktop\runAnsysAasMode.bat &amp;'</span>);
+            pause(10);
+            obj.anCon=ansysConnector();
+            obj.time=0;
+            obj.initializeStructure();
+            obj.getPosOfNodes();
+            obj.getElemNodes();
+            obj.assignDim2El();
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> releaseAnsys(obj)
+            obj.anCon.quit();
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> executeFileAndSync(obj, fname)
+            [~,cmdout]=system([<span class="string">'wmic datafile where name="D:\\Program Files'</span>,<span class="keyword">...</span>
+                <span class="string">'\\Ansys\\ANSYS Inc\\v180\\ansys\\bin\\winx64\\fs.txt"'</span>,<span class="keyword">...</span>
+                <span class="string">' get LastModified | findstr /brc:[0-9]'</span>]);
+            date=str2double(cmdout(10:end-8));
+            obj.anCon.iCoMapdlUnit.executeCommand([<span class="string">'/input,'</span>,fname]);
+            waitForFile(<span class="string">'fs.txt'</span>,date);
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> initializeStructure(obj)
+            obj.executeFileAndSync(<span class="string">'geometryAndMesh.txt'</span>);
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> getPosOfNodes(obj)
+            obj.executeFileAndSync(<span class="string">'positionsOfNodes.txt'</span>);
+            fileID = fopen(<span class="string">'D:\Program Files\Ansys\ANSYS Inc\v180\ansys\bin\winx64\positions.txt'</span>,<span class="string">'r'</span>);
+            formatSpec = <span class="string">'%f'</span>;
+            tempArrray = fscanf(fileID,formatSpec,[2 inf]);
+            obj.nodePositions=tempArrray';
+            fclose(fileID);
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> getElemNodes(obj)
+            obj.executeFileAndSync(<span class="string">'getNodesOfElements.txt'</span>);
+            fileID = fopen(<span class="string">'D:\Program Files\Ansys\ANSYS Inc\v180\ansys\bin\winx64\elNodes.txt'</span>,<span class="string">'r'</span>);
+            formatSpec = <span class="string">'%f'</span>;
+            tempArrray = fscanf(fileID,formatSpec,[2 inf]);
+            obj.elemNodes=tempArrray';
+            fclose(fileID);
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> assignDim2El(obj)
+            obj.elemPos=zeros(size(obj.elemNodes, 1), 4);
+            <span class="keyword">for</span> i=1:1:size(obj.elemNodes, 1)
+                obj.elemPos(i, 1)=obj.nodePositions(obj.elemNodes(i, 1), 1);
+                obj.elemPos(i, 2)=obj.nodePositions(obj.elemNodes(i, 2), 1);
+                obj.elemPos(i, 3)=obj.nodePositions(obj.elemNodes(i, 1), 2);
+                obj.elemPos(i, 4)=obj.nodePositions(obj.elemNodes(i, 2), 2);
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> a=returnAccel(obj, node)
+            obj.anCon.iCoMapdlUnit.executeCommand([<span class="string">'*get,acctx,NODE,'</span>,num2str(node),<span class="string">',A,X'</span>]);
+            obj.anCon.iCoMapdlUnit.executeCommand([<span class="string">'*get,acctx,NODE,'</span>,num2str(node),<span class="string">',A,Y'</span>]);
+            obj.anCon.iCoMapdlUnit.executeCommand([<span class="string">'*get,acctx,NODE,'</span>,num2str(node),<span class="string">',A,Z'</span>]);
+            obj.executeFileAndSync(<span class="string">'getAccelOfNode.txt'</span>);
+
+            fileID = fopen(<span class="string">'D:\Program Files\Ansys\ANSYS Inc\v180\ansys\bin\winx64\accel.txt'</span>,<span class="string">'r'</span>);
+            formatSpec = <span class="string">'%f'</span>;
+            tempArrray = fscanf(fileID,formatSpec,[3 1]);
+            a=tempArrray';
+            fclose(fileID);
+
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> conductIntegration(obj, endTime)
+            obj.anCon.iCoMapdlUnit.executeCommand(<span class="string">'finish'</span>);
+            obj.anCon.iCoMapdlUnit.executeCommand(<span class="string">'/solution'</span>);
+
+        <span class="keyword">end</span>
+        <span class="keyword">function</span> delete(obj)
+            obj.releaseAnsys();
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Warning: File 'D:\Program Files\Ansys\ANSYS
+Inc\v180\ansys\bin\winx64\file.lock' not found. 
+Start Loading AnsysAAS toolbox...
+Warning: Objects of
+AAS_CORBA/MAPDL/Exceptions/EAnsysUnknown class
+exist - not clearing java 
+Warning: Objects of
+AAS_CORBA/MAPDL/Solvers/_ICoMapdlUnitStub class
+exist - not clearing java 
+AnsysAAS toolbox 1.1.5 loaded in Matlab 9.1.0.441655 (R2016b).
+
+ans = 
+
+  controlledBuilding with properties:
+
+            state: []
+             time: 0
+            anCon: [1&times;1 ansysConnector]
+    nodePositions: [1680&times;2 double]
+        elemNodes: [1312&times;2 double]
+          elemPos: [1312&times;4 double]
+
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2016b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+classdef controlledBuilding<handle
+    %UNTITLED Summary of this class goes here
+    %   Detailed explanation goes here
+    
+    properties
+        state double
+        time double
+        anCon ansysConnector
+        nodePositions
+        elemNodes
+        elemPos
+    end
+    
+    methods
+        function obj=controlledBuilding()
+            delete('D:\Program Files\Ansys\ANSYS Inc\v180\ansys\bin\winx64\file.lock');
+            [~,~]=system('c:\Users\wasyl\Desktop\runAnsysAasMode.bat &');
+            pause(10);
+            obj.anCon=ansysConnector();
+            obj.time=0;
+            obj.initializeStructure();
+            obj.getPosOfNodes();
+            obj.getElemNodes();
+            obj.assignDim2El();
+        end
+        function releaseAnsys(obj)
+            obj.anCon.quit();
+        end
+        function executeFileAndSync(obj, fname)
+            [~,cmdout]=system(['wmic datafile where name="D:\\Program Files',...
+                '\\Ansys\\ANSYS Inc\\v180\\ansys\\bin\\winx64\\fs.txt"',...
+                ' get LastModified | findstr /brc:[0-9]']);
+            date=str2double(cmdout(10:end-8));
+            obj.anCon.iCoMapdlUnit.executeCommand(['/input,',fname]);
+            waitForFile('fs.txt',date);
+        end
+        function initializeStructure(obj)
+            obj.executeFileAndSync('geometryAndMesh.txt');
+        end
+        function getPosOfNodes(obj)
+            obj.executeFileAndSync('positionsOfNodes.txt');
+            fileID = fopen('D:\Program Files\Ansys\ANSYS Inc\v180\ansys\bin\winx64\positions.txt','r');
+            formatSpec = '%f';
+            tempArrray = fscanf(fileID,formatSpec,[2 inf]);
+            obj.nodePositions=tempArrray';
+            fclose(fileID);
+        end
+        function getElemNodes(obj)
+            obj.executeFileAndSync('getNodesOfElements.txt');
+            fileID = fopen('D:\Program Files\Ansys\ANSYS Inc\v180\ansys\bin\winx64\elNodes.txt','r');
+            formatSpec = '%f';
+            tempArrray = fscanf(fileID,formatSpec,[2 inf]);
+            obj.elemNodes=tempArrray';
+            fclose(fileID);
+        end
+        function assignDim2El(obj)
+            obj.elemPos=zeros(size(obj.elemNodes, 1), 4);
+            for i=1:1:size(obj.elemNodes, 1)
+                obj.elemPos(i, 1)=obj.nodePositions(obj.elemNodes(i, 1), 1);
+                obj.elemPos(i, 2)=obj.nodePositions(obj.elemNodes(i, 2), 1);
+                obj.elemPos(i, 3)=obj.nodePositions(obj.elemNodes(i, 1), 2);
+                obj.elemPos(i, 4)=obj.nodePositions(obj.elemNodes(i, 2), 2);
+            end
+        end
+        function a=returnAccel(obj, node)
+            obj.anCon.iCoMapdlUnit.executeCommand(['*get,acctx,NODE,',num2str(node),',A,X']);
+            obj.anCon.iCoMapdlUnit.executeCommand(['*get,acctx,NODE,',num2str(node),',A,Y']);
+            obj.anCon.iCoMapdlUnit.executeCommand(['*get,acctx,NODE,',num2str(node),',A,Z']);
+            obj.executeFileAndSync('getAccelOfNode.txt');
+            
+            fileID = fopen('D:\Program Files\Ansys\ANSYS Inc\v180\ansys\bin\winx64\accel.txt','r');
+            formatSpec = '%f';
+            tempArrray = fscanf(fileID,formatSpec,[3 1]);
+            a=tempArrray';
+            fclose(fileID);
+            
+        end
+        function conductIntegration(obj, endTime)
+            obj.anCon.iCoMapdlUnit.executeCommand('finish');
+            obj.anCon.iCoMapdlUnit.executeCommand('/solution');
+            
+        end
+        function delete(obj)
+            obj.releaseAnsys();
+        end
+    end
+    
+end
+
+##### SOURCE END #####
+--></body></html>

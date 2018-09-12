@@ -1,5 +1,0 @@
-*set,forSync,1
-*cfopen,fs.txt
-*VWRITE,forSync
-(F50.25)
-*cfclose
