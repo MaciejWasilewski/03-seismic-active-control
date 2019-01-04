@@ -3,8 +3,6 @@ classdef controlledBuilding<handle
     %   Detailed explanation goes here
     
     properties
-        state double
-        time double
         anCon ansysConnector
         nodePositions
         elemNodes
