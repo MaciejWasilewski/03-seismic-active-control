@@ -27,7 +27,7 @@ classdef hInfController<controllerInterface
     end
     
     methods
-        function obj = hInfController(A,B,C, D, Q, dt)
+        function obj = hInfController(A,B,C, D, Q, dt, rTerm)
             %ADAPTIVECONTROLLER Construct an instance of this class
             %   Detailed explanation goes here
             obj.time=0;
@@ -37,9 +37,14 @@ classdef hInfController<controllerInterface
             obj.Q=Q;
             obj.dt=dt;
             obj.m=size(B,2);
-            system=ss(A,[D,B], [[sqrtm(Q(1:40,1:40)), zeros(40,20); zeros(20,40),0.00064*eye(20)];C],zeros(80,21));
-            [alg_system,~,gam]=hinfsyn(system,20,20, 'METHOD', 'lmi');
-            disp(gam);
+            %             system=ss(A,[D,B], [[sqrtm(Q(1:40,1:40)), zeros(40,20); zeros(20,40),rTerm*eye(20)];C],zeros(80,21));
+            Q2=[sqrtm(Q(1:40,1:40)), zeros(40,20); zeros(20,40),rTerm*eye(20)];
+            system=ss(A,[D,B], [Q2;C;zeros(1,60)],[zeros(60,21);[zeros(20,1);1], zeros(21,20)]);
+            [alg_system,clsystem,gam]=hinfsyn(system,21,20);
+            clsystem=ss(clsystem.A,clsystem.B,[sqrtm(Q(1:40,1:40)), zeros(40,80)],clsystem.D(1:40,:));
+%             disp(clsystem);
+            disp(['Gamma: ', num2str(gam)]);
+            disp(['Gamma2: ', num2str(hinfnorm(clsystem))]);
             alg_system=c2d(alg_system, dt);
             obj.A_alg=alg_system.A;
             obj.B_alg=alg_system.B;
@@ -48,7 +53,7 @@ classdef hInfController<controllerInterface
             obj.measuredDisturbance=[];
             obj.flag=false;
             obj.all_control=zeros(1,obj.m+1);
-            obj.matC=C;            
+            obj.matC=C;
             obj.observerState=zeros(size(obj.A_alg,1),1);
         end
         
@@ -59,8 +64,8 @@ classdef hInfController<controllerInterface
                 obj.time=obj.time+obj.dt;
                 %                 disp(obj.all_control(end, 2:end)');
                 obj.measuredDisturbance=[obj.measuredDisturbance;f];
-                obj.observerState=obj.A_alg*obj.observerState+obj.B_alg*y;
-                u=obj.C_alg*obj.observerState+obj.D_alg*y;
+                obj.observerState=obj.A_alg*obj.observerState+obj.B_alg*[y;f];
+                u=obj.C_alg*obj.observerState+obj.D_alg*[y;f];
                 obj.all_control=[obj.all_control;[obj.time,u']];
             else
                 u=obj.all_control(end, 2:end)';

@@ -88,9 +88,9 @@ classdef adaptiveController<controllerInterface
                     %                 obj.K_alg=obj.dlqr_finite(A,B,obj.Q2,obj.R, obj.S);
                     [~,~,obj.K_alg,flag2]=dare(A,B,obj.Q2,obj.R,[],[]);
                     while flag2<0
-                        disp(flag2);
+%                         disp(flag2);
                         %                     disp(maxeig);
-                        disp(maxeig2);
+%                         disp(maxeig2);
                         maxeig2=maxeig2*1.05;
                         G2=G/maxeig2;
                         A=[obj.matADiscr,obj.matDDiscr*[zeros(1,obj.n-1),1];...
