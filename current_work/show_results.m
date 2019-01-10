@@ -1,12 +1,12 @@
-function show_results(results_array, quakeHandle)
+function show_results(results_array, quakeHandle, matC)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
 figure;
-subplot(2,4,1);
+subplot(2,5,1);
 plot(results_array{1}.time,quakeHandle(results_array{1}.time));
 ylabel('Signal');
 xlabel('t [s]');
-subplot(2,4,2);
+subplot(2,5,2);
 [freqs, amps]=fft_amps(results_array{1}.time(2)-results_array{1}.time(1), quakeHandle(results_array{1}.time));
 semilogx(freqs,amps);
 ylabel('Amplitude spectrum of the signal');
@@ -17,13 +17,20 @@ max_force=zeros(1,length(results_array));
 xQx=zeros(1,length(results_array));
 uu=zeros(1,length(results_array));
 for i=1:1:length(results_array)
-    subplot(2,4,3);
+    subplot(2,5,3);
     plot(results_array{i}.time, results_array{i}.state(:,20), 'DisplayName',results_array{i}.name);
     hold on;
     legend;
     ylabel('Deflections of the roof, x20 [m]');
     xlabel('t [s]');
-    subplot(2,4,4);
+    subplot(2,5,4);
+    temp=results_array{i}.state*matC';
+    plot(results_array{i}.time, temp(:,20), 'DisplayName',results_array{i}.name);
+    hold on;
+    legend;
+    ylabel('Acc of the roof, x20 [m/s2]');
+    xlabel('t [s]');
+    subplot(2,5,5);
     plot(results_array{i}.control_signal(:,1), vecnorm(results_array{i}.control_signal(:,2:end)')', 'DisplayName',results_array{i}.name);
     hold on;
     legend;
