@@ -94,7 +94,9 @@ D22=zeros(21,20);
                 obj.time=obj.time+obj.dt;
                 %                 disp(obj.all_control(end, 2:end)');
                 obj.measuredDisturbance=[obj.measuredDisturbance;f];
+%                 [~,y]=ode45(@(t,x)(obj.A_alg*x+obj.B_alg*[y;f]), [0,obj.dt],obj.observerState);
                 obj.observerState=obj.A_alg*obj.observerState+obj.B_alg*[y;f];
+                obj.observerState=y(end,:)';
                 u=obj.C_alg*obj.observerState+obj.D_alg*[y;f];
                 obj.all_control=[obj.all_control;[obj.time,u']];
             else
